@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local planning documents (not part of the published project)
+plan/
+
+# Logs and OS files
+*.log
+.DS_Store
