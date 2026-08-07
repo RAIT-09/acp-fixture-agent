@@ -134,16 +134,18 @@ unless a scenario deliberately and visibly violates one.
 
 ## Development workflow
 
-- **Gates before every commit**: `npm run typecheck` and `npm test` must pass
-  (`npm run build` too when `dist/` behavior is affected).
+- **Gates before every commit**: `npm run lint`, `npm run typecheck`, and
+  `npm test` must pass (`npm run build` too when `dist/` behavior is
+  affected). `npm run format` applies Biome fixes.
 - **Branches**: `main` holds releasable state; implementation work happens on
   `feat/*` (or `fix/*`, `docs/*`) branches.
 - **Commits**: conventional commits; imperative subject; body of 0–3 lines
   when needed; one concern per commit; no attribution footers or tool
   signatures.
 - **Toolchain**: Node >= 20, TypeScript (native tsc), `tsx` for dev runs,
-  `vitest` for tests. Note: this TypeScript major requires `"types": ["node"]`
-  explicitly in `tsconfig.json`.
+  `vitest` for tests, Biome for formatting and linting (tabs, double quotes;
+  config in `biome.json`). Note: this TypeScript major requires
+  `"types": ["node"]` explicitly in `tsconfig.json`.
 
 ## References
 

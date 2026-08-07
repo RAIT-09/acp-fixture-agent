@@ -17,5 +17,7 @@ if (process.argv.includes("--version") || process.argv.includes("-v")) {
 	process.exit(0);
 }
 
-console.error(`acp-fixture-agent ${version}: agent core is not implemented yet.`);
+console.error(
+	`acp-fixture-agent ${version}: agent core is not implemented yet.`,
+);
 process.exit(1);
