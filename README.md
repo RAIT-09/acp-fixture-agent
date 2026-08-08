@@ -36,7 +36,7 @@ The catalog delivery itself exercises `available_commands_update`, so even scena
 
 ## Protocol coverage
 
-Built on the official [`@agentclientprotocol/sdk`](https://www.npmjs.com/package/@agentclientprotocol/sdk) (pinned exactly; currently `1.3.0`, speaking ACP v1). Each scenario declares which protocol feature it exercises, and the scenario catalog in this README is generated from that registry.
+Built on the official [`@agentclientprotocol/sdk`](https://www.npmjs.com/package/@agentclientprotocol/sdk) (pinned exactly; currently `1.3.0`, speaking ACP v1). Each scenario declares which protocol features it exercises, and [`COVERAGE.md`](./COVERAGE.md) — generated from that metadata — shows what is covered, what is planned, and what is deliberately out of scope. The test suite enforces that the table and the shipped scenarios never drift apart.
 
 ## License
 
