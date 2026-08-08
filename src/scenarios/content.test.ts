@@ -77,6 +77,9 @@ describe("/content-all", () => {
 		if (image?.type === "image") {
 			const bytes = Buffer.from(image.data, "base64");
 			expect(bytes.subarray(0, 4).toString("hex")).toBe("89504e47");
+			// Visibly sized (64x64), not a minimal pixel — IHDR width/height.
+			expect(bytes.readUInt32BE(16)).toBe(64);
+			expect(bytes.readUInt32BE(20)).toBe(64);
 		}
 		if (audio?.type === "audio") {
 			const bytes = Buffer.from(audio.data, "base64");

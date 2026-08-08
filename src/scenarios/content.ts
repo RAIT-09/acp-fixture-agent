@@ -10,15 +10,18 @@ import type { ToolCallContent } from "@agentclientprotocol/sdk";
 import type { Scenario } from "../scenario.js";
 
 /**
- * 1x1 red RGBA PNG, generated once (signature, IHDR dimensions, and IDAT
- * inflation verified) and embedded so image payloads decode for real.
+ * 64x64 red/white checkerboard PNG (8px cells), generated once (signature,
+ * IHDR dimensions, and IDAT round-trip verified) and embedded. A visible
+ * pattern, not a minimal pixel: the fixture's job is letting a human verify
+ * "an image rendered" at a glance, and a checkerboard cannot be mistaken
+ * for a CSS rectangle.
  */
-const TINY_PNG =
-	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==";
+const CHECKER_PNG =
+	"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAeUlEQVR42u3YsQ0AIAwDQe+/dNggqUkOiZKCq15OJdXe6Xz+PgAAAAAAAMBlgOUfnN4DAAAAAAAApwGUIAAAAAAAAGAPUIIAAAAAAACAPUAJAgAAAAAAAPYAJQgAAAAAAADYA5QgAAAAAAAAYA9QggAAAAAAAMA2gAdFLNLCvrIZHgAAAABJRU5ErkJggg==";
 
 /**
  * Minimal valid WAV (PCM 16-bit mono 8kHz, 44-byte header + 4 silent
- * samples), same generation-and-verification policy as TINY_PNG.
+ * samples), same generation-and-verification policy as CHECKER_PNG.
  */
 const TINY_WAV =
 	"UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQgAAAAAAAAAAAAAAA==";
@@ -50,7 +53,7 @@ const contentAll: Scenario = {
 				},
 				{
 					type: "content",
-					content: { type: "image", data: TINY_PNG, mimeType: "image/png" },
+					content: { type: "image", data: CHECKER_PNG, mimeType: "image/png" },
 				},
 				{
 					type: "content",
