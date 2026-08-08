@@ -7,7 +7,9 @@ import {
 } from "./registry.js";
 import type { Scenario } from "./scenario.js";
 
-function fakeScenario(overrides: Partial<Scenario> & { name: string }): Scenario {
+function fakeScenario(
+	overrides: Partial<Scenario> & { name: string },
+): Scenario {
 	return {
 		description: `fake ${overrides.name}`,
 		exercises: [],
@@ -77,7 +79,10 @@ describe("parseCommand", () => {
 });
 
 describe("findScenario", () => {
-	const scenarios = [fakeScenario({ name: "help" }), fakeScenario({ name: "usage" })];
+	const scenarios = [
+		fakeScenario({ name: "help" }),
+		fakeScenario({ name: "usage" }),
+	];
 
 	it("finds a scenario by name", () => {
 		expect(findScenario(scenarios, "usage")?.name).toBe("usage");
@@ -97,9 +102,15 @@ describe("toAvailableCommands", () => {
 
 	it("maps hints into the input specification", () => {
 		expect(
-			toAvailableCommands([fakeScenario({ name: "usage", hint: "percentage" })]),
+			toAvailableCommands([
+				fakeScenario({ name: "usage", hint: "percentage" }),
+			]),
 		).toEqual([
-			{ name: "usage", description: "fake usage", input: { hint: "percentage" } },
+			{
+				name: "usage",
+				description: "fake usage",
+				input: { hint: "percentage" },
+			},
 		]);
 	});
 });
@@ -107,7 +118,11 @@ describe("toAvailableCommands", () => {
 describe("helpText", () => {
 	const scenarios = [
 		fakeScenario({ name: "help", description: "List scenarios" }),
-		fakeScenario({ name: "usage", description: "Report usage", hint: "percentage" }),
+		fakeScenario({
+			name: "usage",
+			description: "Report usage",
+			hint: "percentage",
+		}),
 	];
 
 	it("lists every scenario with its usage form", () => {
