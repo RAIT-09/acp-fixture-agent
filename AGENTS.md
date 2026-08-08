@@ -55,19 +55,18 @@ exercises `available_commands_update`.
 
 ## Architecture
 
-Intended layout (implementation in progress — update this section as code
-lands):
-
 ```
 src/
-├── cli.ts              # bin: arg parsing + stdio wiring around createFixtureAgent
-├── index.ts            # library entry: createFixtureAgent, scenario types, registry
+├── cli.ts              # bin: arg dispatch + stdio wiring; no protocol/scenario logic
+├── cli-args.ts         # pure CLI argument parsing (unit-testable)
+├── index.ts            # library entry: createFixtureAgent, scenario types, builtinScenarios
 ├── agent.ts            # ACP handlers (initialize / session/new / prompt / cancel)
 ├── scenario.ts         # Scenario, ScenarioContext, ProtocolFeature types
-├── registry.ts         # aggregates scenarios; generates commands list + /help
-└── scenarios/          # scenario definitions, grouped by protocol area
+├── registry.ts         # catalog → commands list, /help text, command parsing
+├── test-harness.ts     # in-process capturing client (test-only, excluded from dist)
+└── scenarios/          # scenario modules + echo responder, composed in scenarios/index.ts
 scripts/
-└── generate-catalog.ts # registry → README scenario catalog table
+└── generate-catalog.ts # planned (pre-publish): registry → README catalog table
 ```
 
 Data flow: client sends `session/prompt` → first text block is parsed as
@@ -89,10 +88,11 @@ unless a scenario deliberately and visibly violates one.
    `@agentclientprotocol/claude-agent-acp` adapter does exactly this. The
    deliberate early-send race belongs only in its dedicated timing scenario.
 2. **Slash commands are plain text.** A command arrives as a prompt whose
-   first content block is text starting with `/`; the name runs to the first
-   whitespace and everything after it is the argument string. Hints are
-   advertised via `input.hint`. The command list may be re-sent at any time
-   (dynamic updates are part of the spec).
+   first content block is text starting with `/` (surrounding whitespace is
+   trimmed before the leading-slash check, matching the official adapters);
+   the name runs to the first whitespace and everything after it is the
+   argument string. Hints are advertised via `input.hint`. The command list
+   may be re-sent at any time (dynamic updates are part of the spec).
 3. **Cancellation returns a stop reason, not an error.** On `session/cancel`,
    abort scenario work and resolve the in-flight `session/prompt` with
    `stopReason: "cancelled"`. Clients surface unexpected errors to users; the
@@ -127,8 +127,10 @@ unless a scenario deliberately and visibly violates one.
    (shown in client command popups — one line), optional `hint`, `exercises`
    (protocol features covered), and a deterministic `run(ctx, args)`.
 3. Register it in `src/registry.ts`.
-4. Add an in-process snapshot test asserting the exact update sequence at
-   delay `0`.
+4. Add an in-process test at delay `0` asserting the ordered update-type
+   sequence plus targeted payload assertions. Do not snapshot full payloads:
+   they churn on every copy tweak, while the type sequence still catches
+   unintended update additions, losses, and reordering.
 5. Regenerate the README catalog (`scripts/generate-catalog.ts`); never edit
    the generated table by hand.
 
