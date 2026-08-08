@@ -13,6 +13,13 @@ function step(text: string): ToolCallContent {
 	return { type: "content", content: { type: "text", text } };
 }
 
+/**
+ * The call deliberately NEVER completes: the verdict is its final display
+ * state. (A completing version was unreadable — a wrong pending-bounce
+ * mid-way was overwritten by the terminal status, so correct and buggy
+ * clients ended in the same state.) The normal completion lifecycle is
+ * covered by /content-all.
+ */
 const statusLess: Scenario = {
 	name: "status-less",
 	description:
@@ -38,19 +45,12 @@ const statusLess: Scenario = {
 		});
 		await ctx.delay();
 		await ctx.update({
-			sessionUpdate: "tool_call_update",
-			toolCallId,
-			status: "completed",
-			content: [step("Step 1 done."), step("Step 2 done.")],
-		});
-		await ctx.delay();
-		await ctx.update({
 			sessionUpdate: "agent_message_chunk",
 			content: {
 				type: "text",
 				text:
-					"Expected: the tool call stayed 'in progress' through the middle update and only then completed. " +
-					"If it bounced back to pending mid-way, your client substitutes a default when status is omitted.",
+					"This tool call intentionally never completes. Expected final state: still 'in progress'. " +
+					"If it shows 'pending', your client substitutes a default when an update omits status.",
 			},
 		});
 		return {};

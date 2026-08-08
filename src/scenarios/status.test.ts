@@ -33,16 +33,17 @@ function toolCallEvents(testClient: TestClient): ToolCallEvent[] {
 }
 
 describe("/status-less", () => {
-	it("keeps the middle update status-less while carrying content", async () => {
+	it("streams a status-less update and never completes the call", async () => {
 		const testClient = connect();
 		await runCommand(testClient, "/status-less");
 		const events = toolCallEvents(testClient);
-		expect(events).toHaveLength(3);
+		// Exactly two events — no terminal update exists; the final display
+		// state IS the verdict (in_progress = correct, pending = bug).
+		expect(events).toHaveLength(2);
 		expect(events[0]?.status).toBe("in_progress");
 		// The realistic streaming shape: content present, status absent.
 		expect(events[1] && "status" in events[1]).toBe(false);
 		expect(events[1]?.content).toHaveLength(2);
-		expect(events[2]?.status).toBe("completed");
 	});
 });
 
