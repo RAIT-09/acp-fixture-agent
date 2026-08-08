@@ -5,6 +5,7 @@ import { createFixtureAgent } from "../agent.js";
 import {
 	agentTextChunks,
 	connectTestClient,
+	scenarioUpdateTypes,
 	type TestClient,
 } from "../test-harness.js";
 
@@ -44,6 +45,10 @@ describe("echo responder", () => {
 		expect(text).toContain("> hello world");
 		expect(text).toContain("- [image image/png, 8 base64 chars]");
 		expect(text).toContain("- [resource_link file:///note.md]");
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"agent_message_chunk",
+			"agent_message_chunk",
+		]);
 	});
 
 	it("handles an empty prompt", async () => {

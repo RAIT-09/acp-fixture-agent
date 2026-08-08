@@ -4,6 +4,7 @@ import { createFixtureAgent } from "../agent.js";
 import {
 	agentTextChunks,
 	connectTestClient,
+	scenarioUpdateTypes,
 	type TestClient,
 } from "../test-harness.js";
 
@@ -30,6 +31,7 @@ describe("/help", () => {
 		const text = agentTextChunks(testClient).join("");
 		expect(text).toContain("# acp-fixture-agent scenarios");
 		expect(text).toContain("- `/help` — List every scenario");
+		expect(scenarioUpdateTypes(testClient)).toEqual(["agent_message_chunk"]);
 	});
 
 	it("is advertised in the default catalog", async () => {

@@ -39,6 +39,19 @@ export interface TestClient {
 
 const WAIT_TIMEOUT_MS = 1000;
 
+/**
+ * The ordered `sessionUpdate` types received so far, excluding the commands
+ * advertisement (whose setTimeout(0) delivery races scenario output in
+ * tests). This is the sequence shape a scenario is expected to produce:
+ * asserting it catches unintended update additions, losses, and reordering
+ * without the copy-churn of full-payload snapshots.
+ */
+export function scenarioUpdateTypes(testClient: TestClient): string[] {
+	return testClient.updates
+		.map((notification) => notification.update.sessionUpdate)
+		.filter((type) => type !== "available_commands_update");
+}
+
 /** Extract the text of every agent_message_chunk received so far. */
 export function agentTextChunks(testClient: TestClient): string[] {
 	return testClient.updates.flatMap((notification) =>

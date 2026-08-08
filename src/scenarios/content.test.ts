@@ -3,7 +3,11 @@ import type { SessionUpdate } from "@agentclientprotocol/sdk";
 import { methods } from "@agentclientprotocol/sdk";
 import { describe, expect, it } from "vitest";
 import { createFixtureAgent } from "../agent.js";
-import { connectTestClient, type TestClient } from "../test-harness.js";
+import {
+	connectTestClient,
+	scenarioUpdateTypes,
+	type TestClient,
+} from "../test-harness.js";
 
 function connect(): TestClient {
 	return connectTestClient(createFixtureAgent({ delayMs: 0 }));
@@ -62,6 +66,11 @@ describe("/content-all", () => {
 		]);
 		expect(events[0] && "rawInput" in events[0]).toBe(true);
 		expect(events[1] && "rawOutput" in events[1]).toBe(true);
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 
 	it("carries decodable binary payloads", async () => {
@@ -113,6 +122,14 @@ describe("/content-clear", () => {
 		expect(cleared[0]?.content).toHaveLength(1);
 		expect(cleared[1]?.content).toEqual([]);
 		expect(cleared[1]?.status).toBe("completed");
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call_update",
+			"tool_call_update",
+			"tool_call",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 });
 
@@ -125,5 +142,11 @@ describe("/content-resend", () => {
 		expect(events[1]?.content).toEqual(events[0]?.content);
 		expect(events[2]?.content).toHaveLength(3);
 		expect(events[2]?.status).toBe("completed");
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call_update",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 });

@@ -5,6 +5,7 @@ import { createFixtureAgent } from "../agent.js";
 import {
 	agentTextChunks,
 	connectTestClient,
+	scenarioUpdateTypes,
 	type TestClient,
 } from "../test-harness.js";
 
@@ -52,6 +53,11 @@ describe("/permission", () => {
 		expect(events[0]?.status).toBe("pending");
 		expect(events[1]?.status).toBe("completed");
 		expect(agentTextChunks(testClient).join("")).toContain("`allow_once`");
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 
 	it("filters options by the argument and marks rejections failed", async () => {
@@ -81,6 +87,7 @@ describe("/permission", () => {
 		expect(agentTextChunks(testClient).join("")).toContain(
 			"Unknown permission kind",
 		);
+		expect(scenarioUpdateTypes(testClient)).toEqual(["agent_message_chunk"]);
 	});
 
 	it("stops with the cancelled reason on a cancelled outcome", async () => {
@@ -92,6 +99,7 @@ describe("/permission", () => {
 		expect(response.stopReason).toBe("cancelled");
 		// Only the initial pending tool_call; no terminal update was sent.
 		expect(toolCallEvents(testClient)).toHaveLength(1);
+		expect(scenarioUpdateTypes(testClient)).toEqual(["tool_call"]);
 	});
 });
 
@@ -115,6 +123,13 @@ describe("/permission-queue", () => {
 		expect(agentTextChunks(testClient).join("")).toContain(
 			"call_1: allow_once, call_2: allow_once",
 		);
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call",
+			"tool_call_update",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 });
 
@@ -127,5 +142,6 @@ describe("/permission-orphan", () => {
 			"orphan_1",
 		);
 		expect(toolCallEvents(testClient)).toHaveLength(0);
+		expect(scenarioUpdateTypes(testClient)).toEqual(["agent_message_chunk"]);
 	});
 });

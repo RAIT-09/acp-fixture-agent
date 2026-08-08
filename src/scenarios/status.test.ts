@@ -2,7 +2,11 @@ import type { SessionUpdate } from "@agentclientprotocol/sdk";
 import { methods } from "@agentclientprotocol/sdk";
 import { describe, expect, it } from "vitest";
 import { createFixtureAgent } from "../agent.js";
-import { connectTestClient, type TestClient } from "../test-harness.js";
+import {
+	connectTestClient,
+	scenarioUpdateTypes,
+	type TestClient,
+} from "../test-harness.js";
 
 function connect(): TestClient {
 	return connectTestClient(createFixtureAgent({ delayMs: 0 }));
@@ -44,6 +48,11 @@ describe("/status-less", () => {
 		// The realistic streaming shape: content present, status absent.
 		expect(events[1] && "status" in events[1]).toBe(false);
 		expect(events[1]?.content).toHaveLength(2);
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call_update",
+			"agent_message_chunk",
+		]);
 	});
 });
 
@@ -56,5 +65,10 @@ describe("/completed-at-birth", () => {
 		expect(events.every((e) => e.sessionUpdate === "tool_call")).toBe(true);
 		expect(events.map((e) => e.status)).toEqual(["completed", "failed"]);
 		expect(events.map((e) => e.toolCallId)).toEqual(["call_1", "call_2"]);
+		expect(scenarioUpdateTypes(testClient)).toEqual([
+			"tool_call",
+			"tool_call",
+			"agent_message_chunk",
+		]);
 	});
 });
