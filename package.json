@@ -11,6 +11,14 @@
 		"mock-agent"
 	],
 	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/RAIT-09/acp-fixture-agent.git"
+	},
+	"bugs": {
+		"url": "https://github.com/RAIT-09/acp-fixture-agent/issues"
+	},
+	"homepage": "https://github.com/RAIT-09/acp-fixture-agent#readme",
 	"type": "module",
 	"bin": {
 		"acp-fixture-agent": "./dist/cli.js"
