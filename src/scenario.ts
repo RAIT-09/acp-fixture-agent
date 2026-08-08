@@ -17,27 +17,52 @@ import type {
 } from "@agentclientprotocol/sdk";
 
 /**
- * Protocol feature areas a scenario exercises. Used as coverage metadata:
- * the registry can report which features the catalog covers, and gaps
- * become visible when ACP grows new surface.
+ * The protocol feature vocabulary. Scenarios tag what they exercise with
+ * these ids, and the coverage table (src/coverage.ts) must carry exactly
+ * one row per entry — the runtime array exists so tests can enforce that.
+ * Gaps become visible in COVERAGE.md when ACP grows new surface.
  */
-export type ProtocolFeature =
-	| "message_chunks"
-	| "thought_chunks"
-	| "tool_calls"
-	| "tool_call_content"
-	| "tool_call_status"
-	| "permissions"
-	| "plan"
-	| "commands"
-	| "usage"
-	| "session_info"
-	| "config_options"
-	| "terminal"
-	| "cancellation"
-	| "stop_reasons"
-	| "empty_turn"
-	| "timing";
+export const PROTOCOL_FEATURES = [
+	// messages
+	"message_chunks",
+	"thought_chunks",
+	"message_ids",
+	// prompt input
+	"prompt_content",
+	// tool calls
+	"tool_calls",
+	"tool_call_content",
+	"tool_call_status",
+	"tool_call_locations",
+	"terminal",
+	// permissions
+	"permissions",
+	// commands
+	"commands",
+	"dynamic_commands",
+	// turn
+	"cancellation",
+	"request_cancellation",
+	"stop_reasons",
+	"empty_turn",
+	"timing",
+	// session updates
+	"plan",
+	"usage",
+	"session_info",
+	"config_options",
+	// session lifecycle
+	"session_management",
+	"modes",
+	// client-side surfaces
+	"fs",
+	"auth",
+	"elicitation",
+	"mcp",
+] as const;
+
+/** One entry of {@link PROTOCOL_FEATURES}. */
+export type ProtocolFeature = (typeof PROTOCOL_FEATURES)[number];
 
 /**
  * Thrown by `ScenarioContext` operations when the turn is cancelled

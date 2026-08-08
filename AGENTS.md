@@ -37,8 +37,10 @@ exercises `available_commands_update`.
    and diagnostics go to stderr (clients commonly capture stderr into their
    debug logs, so keep it meaningful and small).
 3. **The scenario registry is the single source of truth.** Command
-   advertisement, the `/help` response, and the README scenario catalog are all
-   generated from it. Never hand-edit generated output.
+   advertisement, the `/help` response, and the "Exercised by" column of
+   `COVERAGE.md` all derive from it; the coverage table rows live in
+   `src/coverage.ts`. Never hand-edit generated output (`COVERAGE.md`
+   carries a GENERATED header and CI fails when it is stale).
 4. **Protocol types come from the SDK only.** No hand-rolled protocol types.
    Tracking ACP updates must stay a mechanical task: bump the SDK, fix type
    errors, re-run snapshots.
@@ -61,12 +63,14 @@ src/
 ├── cli-args.ts         # pure CLI argument parsing (unit-testable)
 ├── index.ts            # library entry: createFixtureAgent, scenario types, builtinScenarios
 ├── agent.ts            # ACP handlers (initialize / session/new / prompt / cancel)
-├── scenario.ts         # Scenario, ScenarioContext, ProtocolFeature types
+├── scenario.ts         # Scenario, ScenarioContext, PROTOCOL_FEATURES vocabulary
 ├── registry.ts         # catalog → commands list, /help text, command parsing
+├── coverage.ts         # coverage table rows + COVERAGE.md renderer
 ├── test-harness.ts     # in-process capturing client (test-only, excluded from dist)
 └── scenarios/          # scenario modules + echo responder, composed in scenarios/index.ts
 scripts/
-└── generate-catalog.ts # planned (pre-publish): registry → README catalog table
+├── generate-coverage.ts # writes COVERAGE.md (npm run generate:coverage)
+└── generate-catalog.ts  # planned (pre-publish): registry → README catalog table
 ```
 
 Data flow: client sends `session/prompt` → first text block is parsed as
@@ -131,8 +135,9 @@ unless a scenario deliberately and visibly violates one.
    sequence plus targeted payload assertions. Do not snapshot full payloads:
    they churn on every copy tweak, while the type sequence still catches
    unintended update additions, losses, and reordering.
-5. Regenerate the README catalog (`scripts/generate-catalog.ts`); never edit
-   the generated table by hand.
+5. Update the matching row in `src/coverage.ts` (typically planned →
+   covered) and run `npm run generate:coverage`. The coverage tests fail
+   when the table, the vocabulary, and the catalog disagree.
 
 ## Development workflow
 
