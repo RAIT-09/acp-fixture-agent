@@ -27,6 +27,8 @@ export type PermissionResponder = (
 export interface TestClient {
 	/** All session/update notifications received, in order. */
 	updates: SessionNotification[];
+	/** All permission requests received, in order. */
+	permissionRequests: RequestPermissionRequest[];
 	/** The live connection; use `connection.agent` to call agent methods. */
 	connection: ClientConnection;
 	/** Replace the permission responder (default: select the first option). */
@@ -49,6 +51,7 @@ export function agentTextChunks(testClient: TestClient): string[] {
 
 export function connectTestClient(app: AgentApp): TestClient {
 	const updates: SessionNotification[] = [];
+	const permissionRequests: RequestPermissionRequest[] = [];
 	let permissionResponder: PermissionResponder = (request) => ({
 		outcome: {
 			outcome: "selected",
@@ -60,13 +63,15 @@ export function connectTestClient(app: AgentApp): TestClient {
 		.onNotification(methods.client.session.update, (ctx) => {
 			updates.push(ctx.params);
 		})
-		.onRequest(methods.client.session.requestPermission, (ctx) =>
-			permissionResponder(ctx.params),
-		)
+		.onRequest(methods.client.session.requestPermission, (ctx) => {
+			permissionRequests.push(ctx.params);
+			return permissionResponder(ctx.params);
+		})
 		.connect(app);
 
 	return {
 		updates,
+		permissionRequests,
 		connection,
 		respondToPermission(responder) {
 			permissionResponder = responder;
