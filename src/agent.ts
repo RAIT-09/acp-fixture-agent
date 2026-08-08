@@ -22,6 +22,8 @@ import {
 	type ScenarioOutcome,
 	TurnCancelledError,
 } from "./scenario.js";
+import { runEcho } from "./scenarios/echo.js";
+import { builtinScenarios } from "./scenarios/index.js";
 
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../package.json") as {
@@ -37,9 +39,6 @@ export interface FixtureAgentOptions {
 	/** Scenario catalog. Defaults to the built-in scenarios. */
 	scenarios?: readonly Scenario[];
 }
-
-/** Built-in scenario catalog. Populated by the scenario modules. */
-const builtinScenarios: readonly Scenario[] = [];
 
 interface SessionState {
 	/** Per-prefix id counters; persist across turns so ids never collide. */
@@ -126,9 +125,8 @@ export function createFixtureAgent(
 				if (scenario && parsed) {
 					outcome = await scenario.run(scenarioCtx, parsed.args);
 				} else {
-					// Placeholder until the echo responder lands: unknown input
-					// ends the turn without updates.
-					outcome = {};
+					// Non-command and unknown-command input gets the echo reply.
+					outcome = await runEcho(scenarioCtx);
 				}
 				return { stopReason: outcome.stopReason ?? "end_turn" };
 			} catch (error) {

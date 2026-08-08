@@ -11,3 +11,4 @@ export type {
 	ScenarioOutcome,
 } from "./scenario.js";
 export { TurnCancelledError } from "./scenario.js";
+export { builtinScenarios } from "./scenarios/index.js";

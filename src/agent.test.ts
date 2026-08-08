@@ -3,7 +3,11 @@ import { methods } from "@agentclientprotocol/sdk";
 import { describe, expect, it } from "vitest";
 import { createFixtureAgent, type FixtureAgentOptions } from "./agent.js";
 import type { Scenario } from "./scenario.js";
-import { connectTestClient, type TestClient } from "./test-harness.js";
+import {
+	agentTextChunks,
+	connectTestClient,
+	type TestClient,
+} from "./test-harness.js";
 
 function textPrompt(text: string): PromptRequest["prompt"] {
 	return [{ type: "text", text }];
@@ -124,17 +128,25 @@ describe("session/prompt", () => {
 		expect(response.stopReason).toBe("refusal");
 	});
 
-	it("ends the turn without updates for non-command and unknown input", async () => {
+	it("echoes non-command input back with guidance", async () => {
 		const testClient = connect();
 		const sessionId = await newSession(testClient);
-		for (const text of ["hello", "/unknown"]) {
-			const response = await sendPrompt(testClient, sessionId, text);
-			expect(response.stopReason).toBe("end_turn");
-		}
-		const nonAdvertisement = testClient.updates.filter(
-			(u) => u.update.sessionUpdate !== "available_commands_update",
+		const response = await sendPrompt(testClient, sessionId, "hello");
+		expect(response.stopReason).toBe("end_turn");
+		const texts = agentTextChunks(testClient);
+		expect(texts).toHaveLength(2);
+		expect(texts[0]).toContain("> hello");
+		expect(texts[1]).toContain("Type `/` to browse test scenarios");
+	});
+
+	it("flags unknown commands in the echo reply", async () => {
+		const testClient = connect();
+		const sessionId = await newSession(testClient);
+		const response = await sendPrompt(testClient, sessionId, "/unknown");
+		expect(response.stopReason).toBe("end_turn");
+		expect(agentTextChunks(testClient).join("")).toContain(
+			"Unknown command `/unknown`",
 		);
-		expect(nonAdvertisement).toHaveLength(0);
 	});
 
 	it("rejects prompts for unknown sessions", async () => {

@@ -37,6 +37,16 @@ export interface TestClient {
 
 const WAIT_TIMEOUT_MS = 1000;
 
+/** Extract the text of every agent_message_chunk received so far. */
+export function agentTextChunks(testClient: TestClient): string[] {
+	return testClient.updates.flatMap((notification) =>
+		notification.update.sessionUpdate === "agent_message_chunk" &&
+		notification.update.content.type === "text"
+			? [notification.update.content.text]
+			: [],
+	);
+}
+
 export function connectTestClient(app: AgentApp): TestClient {
 	const updates: SessionNotification[] = [];
 	let permissionResponder: PermissionResponder = (request) => ({
