@@ -110,40 +110,69 @@ const contentAll: Scenario = {
 	},
 };
 
+function textEntry(text: string): ToolCallContent {
+	return { type: "content", content: { type: "text", text } };
+}
+
+/**
+ * Two calls whose FINAL states are the verdicts, so a single look at the
+ * finished chat answers both directions. (A one-call version turned out to
+ * be unreadable: a client that wrongly clears on omitted content ends in
+ * the same empty state as a correct one — the verdict lived only in a
+ * transient mid-state.)
+ */
 const contentClear: Scenario = {
 	name: "content-clear",
 	description: "Probe omitted-vs-empty content semantics on tool call updates",
 	exercises: ["tool_calls", "tool_call_content"],
 	run: async (ctx) => {
-		const toolCallId = ctx.nextId("call");
+		// Call 1: omitted content must SURVIVE — sentinel visible at the end.
+		const survivor = ctx.nextId("call");
 		await ctx.update({
 			sessionUpdate: "tool_call",
-			toolCallId,
-			title: "Content survives an omitted-content update",
+			toolCallId: survivor,
+			title: "Omitted content must SURVIVE",
 			kind: "other",
 			status: "in_progress",
 			content: [
-				{
-					type: "content",
-					content: {
-						type: "text",
-						text: "SENTINEL: this content must survive the next update.",
-					},
-				},
+				textEntry(
+					"SENTINEL-KEEP: this text must still be visible when the call completes.",
+				),
 			],
 		});
 		await ctx.delay();
-		// Omits `content` (and `status`) entirely: both must stay unchanged.
+		// Title-only update: `content` and `status` keys entirely absent.
 		await ctx.update({
 			sessionUpdate: "tool_call_update",
-			toolCallId,
-			title: "Title changed; content must still be visible",
+			toolCallId: survivor,
+			title: "Omitted content must SURVIVE (title updated)",
 		});
 		await ctx.delay();
-		// Explicit empty array: the client must clear the content now.
+		// Completes without a content key: the sentinel must remain.
 		await ctx.update({
 			sessionUpdate: "tool_call_update",
-			toolCallId,
+			toolCallId: survivor,
+			status: "completed",
+		});
+		await ctx.delay();
+		// Call 2: an explicit empty array must CLEAR — empty at the end.
+		const cleared = ctx.nextId("call");
+		await ctx.update({
+			sessionUpdate: "tool_call",
+			toolCallId: cleared,
+			title: "Empty array must CLEAR",
+			kind: "other",
+			status: "in_progress",
+			content: [
+				textEntry(
+					"SENTINEL-CLEAR: this text must be gone when the call completes.",
+				),
+			],
+		});
+		await ctx.delay();
+		await ctx.update({
+			sessionUpdate: "tool_call_update",
+			toolCallId: cleared,
 			status: "completed",
 			content: [],
 		});
@@ -153,9 +182,9 @@ const contentClear: Scenario = {
 			content: {
 				type: "text",
 				text:
-					"Expected: the sentinel text survived the title-only update, then disappeared on the final update. " +
-					"If it vanished early, your client treats omitted content as a clear; " +
-					"if it is still visible, your client ignored the explicit empty array.",
+					"Expected final state: the first call still shows its SENTINEL-KEEP text " +
+					"(if it is empty, your client treats omitted content as a clear), and the second call " +
+					"shows no content (if SENTINEL-CLEAR is still visible, your client ignored the explicit empty array).",
 			},
 		});
 		return {};

@@ -90,19 +90,29 @@ describe("/content-all", () => {
 });
 
 describe("/content-clear", () => {
-	it("omits the content key entirely before clearing with an empty array", async () => {
+	it("splits the probe into survive and clear calls with end-state verdicts", async () => {
 		const testClient = connect();
 		await runCommand(testClient, "/content-clear");
 		const events = toolCallEvents(testClient);
-		expect(events).toHaveLength(3);
-		expect(events[0]?.content).toHaveLength(1);
-		// The middle update must not carry the keys at all — omission, not
-		// an explicit undefined — because that is what "unchanged" means on
-		// the wire.
-		expect(events[1] && "content" in events[1]).toBe(false);
-		expect(events[1] && "status" in events[1]).toBe(false);
-		expect(events[2]?.content).toEqual([]);
-		expect(events[2]?.status).toBe("completed");
+		expect(events).toHaveLength(5);
+
+		// Call 1: every update after the first omits the content key entirely
+		// — omission, not an explicit undefined — because that is what
+		// "unchanged" means on the wire.
+		const survivor = events.filter((event) => event.toolCallId === "call_1");
+		expect(survivor).toHaveLength(3);
+		expect(survivor[0]?.content).toHaveLength(1);
+		expect(survivor[1] && "content" in survivor[1]).toBe(false);
+		expect(survivor[1] && "status" in survivor[1]).toBe(false);
+		expect(survivor[2]?.status).toBe("completed");
+		expect(survivor[2] && "content" in survivor[2]).toBe(false);
+
+		// Call 2: the explicit empty array clears.
+		const cleared = events.filter((event) => event.toolCallId === "call_2");
+		expect(cleared).toHaveLength(2);
+		expect(cleared[0]?.content).toHaveLength(1);
+		expect(cleared[1]?.content).toEqual([]);
+		expect(cleared[1]?.status).toBe("completed");
 	});
 });
 
