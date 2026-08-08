@@ -7,9 +7,11 @@
 import type { Scenario } from "../scenario.js";
 import { contentScenarios } from "./content.js";
 import { createHelpScenario } from "./help.js";
+import { statusScenarios } from "./status.js";
 
 const catalog: Scenario[] = [];
 catalog.push(createHelpScenario(() => catalog));
 catalog.push(...contentScenarios);
+catalog.push(...statusScenarios);
 
 export const builtinScenarios: readonly Scenario[] = catalog;
