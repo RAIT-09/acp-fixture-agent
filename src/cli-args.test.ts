@@ -18,6 +18,8 @@ describe("parseCliArgs", () => {
 		expect(parseCliArgs(["--delay", "-1"]).kind).toBe("error");
 		expect(parseCliArgs(["--delay", "abc"]).kind).toBe("error");
 		expect(parseCliArgs(["--delay"]).kind).toBe("error");
+		expect(parseCliArgs(["--delay", ""]).kind).toBe("error");
+		expect(parseCliArgs(["--delay", "1e2"]).kind).toBe("error");
 	});
 
 	it("recognizes the informational flags", () => {

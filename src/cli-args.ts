@@ -24,14 +24,16 @@ export function parseCliArgs(argv: readonly string[]): CliCommand {
 			case "--list-scenarios":
 				return { kind: "list-scenarios" };
 			case "--delay": {
-				const value = Number(argv[++i]);
-				if (!Number.isInteger(value) || value < 0) {
+				// Digits only: Number("") is 0 and Number accepts forms like
+				// "1e2", so a plain conversion would let those through.
+				const rawValue = argv[++i];
+				if (rawValue === undefined || !/^\d+$/.test(rawValue)) {
 					return {
 						kind: "error",
 						message: "--delay requires a non-negative integer (milliseconds)",
 					};
 				}
-				delayMs = value;
+				delayMs = Number(rawValue);
 				break;
 			}
 			default:
