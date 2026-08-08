@@ -184,7 +184,8 @@ const contentClear: Scenario = {
 				text:
 					"Expected final state: the first call still shows its SENTINEL-KEEP text " +
 					"(if it is empty, your client treats omitted content as a clear), and the second call " +
-					"shows no content (if SENTINEL-CLEAR is still visible, your client ignored the explicit empty array).",
+					"shows no content (if SENTINEL-CLEAR is still visible, your client ignored the explicit empty array). " +
+					"Expand the tool calls first if your client collapses them.",
 			},
 		});
 		return {};

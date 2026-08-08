@@ -50,7 +50,8 @@ const statusLess: Scenario = {
 				type: "text",
 				text:
 					"This tool call intentionally never completes. Expected final state: still 'in progress'. " +
-					"If it shows 'pending', your client substitutes a default when an update omits status.",
+					"If it shows 'pending', your client substitutes a default when an update omits status. " +
+					"(If your client renders both states identically, this verdict is unreadable there — that is a client UI gap worth fixing.)",
 			},
 		});
 		return {};
