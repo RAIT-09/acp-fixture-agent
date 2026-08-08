@@ -52,4 +52,17 @@ describe("echo responder", () => {
 		await sendPrompt(testClient, sessionId, []);
 		expect(agentTextChunks(testClient).join("")).toContain("(empty prompt)");
 	});
+
+	it("diagnoses a command masked by leading blocks", async () => {
+		const testClient = connect();
+		const sessionId = await newSession(testClient);
+		await sendPrompt(testClient, sessionId, [
+			{ type: "text", text: "Always use wikilink syntax in this vault." },
+			{ type: "text", text: "/help" },
+		]);
+		const text = agentTextChunks(testClient).join("");
+		expect(text).toContain("Block 2 looks like the command `/help`");
+		expect(text).toContain("only detected in the FIRST content block");
+		expect(text).toContain("1 other block(s) before it");
+	});
 });
