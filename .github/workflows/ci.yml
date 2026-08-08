@@ -19,3 +19,5 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: npm test
+      # COVERAGE.md is generated; fail when the committed file is stale.
+      - run: npm run generate:coverage && git diff --exit-code COVERAGE.md
